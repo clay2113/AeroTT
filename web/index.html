@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AeroTT | Live Aero Fit</title>
+    <link rel="stylesheet" href="/web/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="main-nav">
+        <a class="main-brand" href="/">
+          <span class="main-brand-mark">AT</span>
+          <span><strong>aerott.org</strong><small>cycling aerodynamics</small></span>
+        </a>
+        <p class="nav-label">Workspace</p>
+        <nav class="view-nav" aria-label="AeroTT tools">
+          <button class="view-link active" data-view="estimateView" type="button"><span>01</span><b>Estimate CdA</b><small>camera silhouette analysis</small></button>
+          <button class="view-link" data-view="speedView" type="button"><span>02</span><b>CdA to speed</b><small>performance projection</small></button>
+        </nav>
+        <a class="lab-link" href="/web/calculator.html">Open CdA Lab &rarr;</a>
+      </aside>
+
+      <div class="page-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">aerott.org / time trial position</p>
+          <h1>Live Aero Fit</h1>
+        </div>
+        <div class="actions">
+          <span id="serverStatus" class="status-pill">Model loading</span>
+          <input id="imageUpload" class="file-input" type="file" accept="image/*" hidden />
+          <button id="uploadButton" type="button">Upload pic</button>
+          <button id="analyzeImageButton" type="button" disabled>Analyze pic</button>
+          <button id="startButton" type="button" class="primary">Start camera</button>
+          <button id="stopButton" type="button" disabled>Stop</button>
+        </div>
+      </header>
+
+      <section id="estimateView" class="view-panel active-view" aria-label="CdA estimate view">
+      <section class="metrics-strip" aria-label="Live aero estimates">
+        <article class="metric-card hero-metric">
+          <span>Frontal area</span>
+          <strong id="areaValue">--</strong>
+          <small>m<sup>2</sup></small>
+        </article>
+        <article class="metric-card hero-metric accent">
+          <span>CdA estimate</span>
+          <strong id="cdaValue">--</strong>
+          <small>m<sup>2</sup></small>
+        </article>
+        <article class="metric-card">
+          <span>Mask pixels</span>
+          <strong id="pixelValue">--</strong>
+        </article>
+        <article class="metric-card">
+          <span>Reference</span>
+          <strong id="referenceValue">--</strong>
+          <small>px</small>
+        </article>
+        <article class="metric-card">
+          <span>Throughput</span>
+          <strong id="fpsValue">--</strong>
+          <small>fps</small>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <div class="comparison-grid">
+          <article class="video-panel">
+            <div class="panel-title">
+              <span>Original</span>
+              <span id="videoSize">--</span>
+            </div>
+            <div class="viewport">
+              <video id="sourceVideo" playsinline muted></video>
+              <canvas id="sourceCanvas"></canvas>
+              <div id="cameraPlaceholder" class="placeholder">Camera idle</div>
+            </div>
+          </article>
+
+          <article class="video-panel">
+            <div class="panel-title">
+              <span>Segmentation</span>
+              <span id="detectionStatus">No frame</span>
+            </div>
+            <div class="viewport">
+              <canvas id="segmentationCanvas"></canvas>
+              <div id="segmentationPlaceholder" class="placeholder">Awaiting frame</div>
+            </div>
+          </article>
+
+          <article class="video-panel classifier-panel">
+            <div class="panel-title">
+              <span>Classifier</span>
+              <span id="classifierStatus">No boxes</span>
+            </div>
+            <div class="viewport">
+              <canvas id="classifierCanvas"></canvas>
+              <div id="classifierPlaceholder" class="placeholder">Awaiting boxes</div>
+            </div>
+            <div class="live-description">
+              <span>Live description</span>
+              <p id="liveDescription">Start the camera or upload a photo to generate a rider summary.</p>
+            </div>
+          </article>
+        </div>
+
+        <aside class="control-panel">
+          <div class="control-group">
+            <div class="group-header">
+              <h2>Calibration</h2>
+              <span id="calibrationState">Auto</span>
+            </div>
+            <label class="segmented">
+              <input type="checkbox" id="autoCalibration" checked />
+              <span>Auto width from mask</span>
+            </label>
+            <label>
+              <span>Known width</span>
+              <div class="number-field">
+                <input id="referenceMeters" type="number" min="0.05" max="2.5" step="0.01" value="0.42" />
+                <small>m</small>
+              </div>
+            </label>
+            <label>
+              <span>Reference pixels</span>
+              <div class="number-field">
+                <input id="referencePixels" type="number" min="0" max="5000" step="1" value="0" disabled />
+                <small>px</small>
+              </div>
+            </label>
+            <div class="button-row">
+              <button id="calibrateButton" type="button">Set points</button>
+              <button id="clearCalibrationButton" type="button">Clear</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="group-header">
+              <h2>Estimate</h2>
+              <span id="modelDevice">CPU</span>
+            </div>
+            <label>
+              <span>Cd multiplier</span>
+              <div class="number-field">
+                <input id="dragCoefficient" type="number" min="0.2" max="1.5" step="0.01" value="0.72" />
+                <small>Cd</small>
+              </div>
+            </label>
+            <label>
+              <span>Confidence</span>
+              <input id="confidence" type="range" min="0.05" max="0.9" step="0.01" value="0.25" />
+              <output id="confidenceValue">0.25</output>
+            </label>
+            <label>
+              <span>Model size</span>
+              <select id="imageSize">
+                <option value="416" selected>416</option>
+                <option value="512">512</option>
+                <option value="640">640</option>
+                <option value="768">768</option>
+              </select>
+            </label>
+            <label class="segmented">
+              <input type="checkbox" id="includeBicycle" checked />
+              <span>Include bicycle mask</span>
+            </label>
+          </div>
+
+          <div class="control-group compact">
+            <div class="readout-row">
+              <span>Detections</span>
+              <strong id="detectionsValue">--</strong>
+            </div>
+            <div class="readout-row">
+              <span>Best box</span>
+              <strong id="bestBoxValue">--</strong>
+            </div>
+            <div class="readout-row">
+              <span>Processing</span>
+              <strong id="processingValue">--</strong>
+            </div>
+            <div class="readout-row">
+              <span>Scale</span>
+              <strong id="scaleValue">--</strong>
+            </div>
+          </div>
+        </aside>
+      </section>
+      </section>
+
+      <section id="speedView" class="view-panel speed-view" aria-label="CdA to speed view" hidden>
+        <div class="speed-heading">
+          <div><p class="eyebrow">Performance projection</p><h2>CdA to speed</h2><p>Use a measured or manual CdA to find the steady speed your power can support.</p></div>
+          <span id="speedCdaSource" class="speed-source">Waiting for CdA</span>
+        </div>
+        <div class="speed-layout">
+          <div class="speed-inputs">
+            <label><span>CdA</span><div class="number-field"><input id="speedCda" type="number" min="0.05" max="1.5" step="0.0001" value="0.2729" /><small>m<sup>2</sup></small></div></label>
+            <label><span>Rider power</span><div class="number-field"><input id="speedPower" type="number" min="1" max="3000" step="1" value="200" /><small>W</small></div></label>
+            <label><span>Temperature</span><div class="number-field"><input id="speedTemperature" type="number" step="0.1" value="20" /><small>&deg;C</small></div></label>
+            <label><span>Altitude</span><div class="number-field"><input id="speedAltitude" type="number" step="10" value="0" /><small>m</small></div></label>
+            <label><span>Rolling resistance</span><div class="number-field"><input id="speedCrr" type="number" min="0" max="0.1" step="0.0001" value="0.00366" /><small>CRR</small></div></label>
+            <label><span>Drivetrain efficiency</span><div class="number-field"><input id="speedEfficiency" type="number" min="50" max="100" step="0.1" value="96.5" /><small>%</small></div></label>
+            <label><span>Rider + bike</span><div class="number-field"><input id="speedMass" type="number" min="20" max="250" step="0.1" value="80" /><small>kg</small></div></label>
+          </div>
+          <div class="speed-result">
+            <span>Projected steady speed</span>
+            <strong id="projectedSpeed">--</strong><small>km/h</small>
+            <div class="speed-breakdown"><div><span>Aero power</span><b id="speedAeroPower">--</b><small>W</small></div><div><span>Rolling power</span><b id="speedRollingPower">--</b><small>W</small></div><div><span>Air density</span><b id="speedAirDensity">--</b><small>kg/m<sup>3</sup></small></div></div>
+          </div>
+        </div>
+        <div class="formula-panel"><span>How it works</span><p>The calculator solves for the speed where wheel power equals aerodynamic drag power plus rolling resistance on a flat road in still air.</p><code>P<sub>wheel</sub> = 0.5 &times; &rho; &times; CdA &times; v<sup>3</sup> + CRR &times; m &times; g &times; v</code></div>
+      </section>
+      </div>
+    </main>
+
+    <script src="/web/app.js" type="module"></script>
+  </body>
+</html>

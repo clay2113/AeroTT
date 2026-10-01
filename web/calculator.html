@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AeroTT | CdA Lab</title>
+    <link rel="stylesheet" href="/web/calculator.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/">
+          <span class="brand-mark">AT</span>
+          <span><strong>aerott.org</strong><small>cycling aerodynamics</small></span>
+        </a>
+        <div class="sidebar-label">CdA lab</div>
+        <nav class="feature-nav" aria-label="Calculator features">
+          <button class="feature-link active" data-feature="cda" type="button"><span>01</span><b>CdA estimate</b><small>camera or manual input</small></button>
+          <button class="feature-link" data-feature="density" type="button"><span>02</span><b>Air density</b><small>temperature and altitude</small></button>
+          <button class="feature-link" data-feature="aero" type="button"><span>03</span><b>Aero power</b><small>drag at speed</small></button>
+          <button class="feature-link" data-feature="rolling" type="button"><span>04</span><b>Rolling power</b><small>tires and mass</small></button>
+          <button class="feature-link" data-feature="wheel" type="button"><span>05</span><b>Wheel power</b><small>drivetrain losses</small></button>
+          <button class="feature-link" data-feature="inferred" type="button"><span>06</span><b>CdA from power</b><small>reverse estimate</small></button>
+          <button class="feature-link" data-feature="speed" type="button"><span>07</span><b>Speed from power</b><small>performance projection</small></button>
+        </nav>
+        <a class="back-link" href="/">&larr; Back to Live Aero Fit</a>
+      </aside>
+
+      <main class="main-content">
+        <header class="page-header">
+          <div><p class="kicker">AeroTT / calculator</p><h1>CdA lab</h1><p class="lede">Turn a measured position into a useful riding number.</p></div>
+          <div class="header-badge"><span class="status-dot"></span><span id="cdaSource">Manual CdA</span></div>
+        </header>
+
+        <section class="input-band" aria-label="Ride conditions">
+          <div class="band-heading"><span>Ride conditions</span><small>Flat road &middot; still air &middot; steady effort</small></div>
+          <div class="input-grid">
+            <label class="wide-field"><span>CdA</span><div class="input-with-unit"><input id="cdaInput" type="number" min="0.05" max="1.5" step="0.0001" value="0.2729" /><small>m<sup>2</sup></small></div><button id="useLatestCda" class="text-button" type="button">Use latest camera value</button></label>
+            <label><span>Temperature</span><div class="input-with-unit"><input id="temperatureInput" type="number" step="0.1" value="20" /><small>&deg;C</small></div></label>
+            <label><span>Altitude</span><div class="input-with-unit"><input id="altitudeInput" type="number" step="10" value="0" /><small>m</small></div></label>
+            <label><span>Rolling resistance</span><div class="input-with-unit"><input id="crrInput" type="number" min="0" max="0.1" step="0.0001" value="0.00366" /><small>CRR</small></div></label>
+            <label><span>Drivetrain efficiency</span><div class="input-with-unit"><input id="efficiencyInput" type="number" min="50" max="100" step="0.1" value="96.5" /><small>%</small></div></label>
+            <label><span>Rider + bike</span><div class="input-with-unit"><input id="massInput" type="number" min="20" max="250" step="0.1" value="80" /><small>kg</small></div></label>
+            <label><span>Speed</span><div class="input-with-unit"><input id="speedInput" type="number" min="1" max="150" step="0.1" value="36" /><small>km/h</small></div></label>
+            <label><span>Power</span><div class="input-with-unit"><input id="powerInput" type="number" min="1" max="3000" step="1" value="200" /><small>W</small></div></label>
+          </div>
+        </section>
+
+        <section class="result-area" aria-live="polite">
+          <div class="result-heading"><div><p class="kicker">Live calculation</p><h2 id="resultTitle">CdA estimate</h2></div><span id="resultValue" class="result-value">0.2729 <small>m<sup>2</sup></small></span></div>
+          <div class="result-track"><span id="resultTrackFill"></span></div>
+          <p id="resultSummary" class="result-summary">Your aerodynamic drag area is the frontal area multiplied by its drag coefficient.</p>
+          <div class="detail-grid">
+            <article><span>Air density</span><strong id="densityValue">1.204</strong><small>kg/m<sup>3</sup></small></article>
+            <article><span>Aero power</span><strong id="aeroValue">--</strong><small>W</small></article>
+            <article><span>Rolling power</span><strong id="rollingValue">--</strong><small>W</small></article>
+            <article><span>Wheel power</span><strong id="wheelValue">--</strong><small>W</small></article>
+          </div>
+        </section>
+
+        <section class="explain-area">
+          <div class="explain-heading"><span class="formula-tag">How it works</span><h2 id="explainTitle">CdA estimate</h2></div>
+          <p id="explainBody">CdA describes how much aerodynamic drag your rider and bike create. In this app, the camera estimates frontal area from the silhouette and applies the selected drag coefficient.</p>
+          <div class="formula-box"><span>Formula</span><code id="formulaText">CdA = frontal area (A) x drag coefficient (Cd)</code></div>
+          <p id="assumptionText" class="assumption">The camera-derived value is an estimate. Position, clothing, wind, and calibration quality all affect it.</p>
+        </section>
+      </main>
+    </div>
+    <script src="/web/calculator.js" type="module"></script>
+  </body>
+</html>
