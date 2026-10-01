@@ -5,15 +5,6 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/api/**",
-        "run": {
-          "serviceId": "aerott-api",
-          "region": "us-central1"
-        }
-      }
     ]
   }
 }
