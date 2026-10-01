@@ -1,0 +1,12 @@
+.git
+.venv
+__pycache__
+.ultralytics
+dataset
+src
+web
+sam_vit_b_01ec64.pth
+yolov8n.pt
+*.jpg
+*.jpeg
+*.png
