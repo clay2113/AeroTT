@@ -23,6 +23,8 @@ __pycache__/
 /sam_vit_b_01ec64.pth
 
 # Local environment and editor files
+.agents/
+.firebase/
 .env
 .env.*
 !.env.example
