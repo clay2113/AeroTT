@@ -426,6 +426,14 @@ class AeroRequestHandler(BaseHTTPRequestHandler):
             self.send_static(target)
             return
 
+        if route not in {"/", "/index.html"}:
+            target = (WEB_ROOT / route.lstrip("/")).resolve()
+            if WEB_ROOT.resolve() not in target.parents:
+                self.send_error(HTTPStatus.FORBIDDEN)
+                return
+            self.send_static(target)
+            return
+
         self.send_error(HTTPStatus.NOT_FOUND)
 
     def do_POST(self) -> None:
